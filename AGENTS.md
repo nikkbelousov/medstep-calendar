@@ -31,6 +31,7 @@ Phase 2 является текущей базой: приложение ста�
 - пресеты схем;
 - собственная повторяющаяся последовательность дней;
 - переключение языка интерфейса RU/EN/HY;
+- базовая PWA-поддержка;
 - сохранение в `localStorage`;
 - миграция старых локальных отметок.
 
@@ -45,6 +46,8 @@ Legacy key:
 - `omez-taper-calendar-v1`
 
 Legacy key нужен только для чтения старых локальных отметок при миграции. Не удаляй его автоматически и не показывай пользователю как часть публичного UI.
+
+Данные из `localStorage` нужно нормализовать через `normalizeAppState`, не доверять сохранённому JSON напрямую. Невалидные поля заменяй дефолтами или отбрасывай, валидные пользовательские records сохраняй.
 
 Публичные тексты не должны ссылаться на старый прототип. Используй нейтральные формулировки вроде “базовый план”, “настройки плана”, “сбросить настройки плана”.
 
@@ -104,7 +107,10 @@ http://127.0.0.1:5173/
 - `src/lib/date.ts` — date helpers;
 - `src/lib/plan.ts` — типы, пресеты, расчёт планового дня;
 - `src/lib/storage.ts` — сохранение, загрузка и миграция storage;
-- `src/styles.css` — Tailwind и общие component classes.
+- `src/styles.css` — Tailwind и общие component classes;
+- `public/manifest.webmanifest` — PWA manifest;
+- `public/sw.js` — production service worker;
+- `public/icons/app-icon.svg` — app icon.
 
 Держи структуру простой. Выноси компоненты только если файл стал реально тяжёлым или изменение становится трудно проверять.
 
@@ -187,11 +193,10 @@ This app is a personal tracking tool. It does not provide medical advice, diagno
 
 Ближайшие направления после текущей публичной полировки:
 
-- PWA installability;
 - export/import JSON;
 - print-friendly view.
 
-Не добавляй PWA, новый тестовый фреймворк или export/import без отдельного решения пользователя.
+Не добавляй новый тестовый фреймворк, export/import или print view без отдельного решения пользователя.
 
 ## Environment
 

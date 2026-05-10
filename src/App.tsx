@@ -47,6 +47,10 @@ export default function App() {
   const locale = config.locale;
 
   useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
+  useEffect(() => {
     saveState(state);
   }, [state]);
 

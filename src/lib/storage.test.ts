@@ -79,6 +79,121 @@ describe("storage", () => {
     expect(loadState().config.locale).toBe("ru");
   });
 
+  it("normalizes malformed config fields", () => {
+    window.localStorage.setItem(
+      STORAGE_KEY_V2,
+      JSON.stringify({
+        config: {
+          ...createDefaultConfig(),
+          locale: "de",
+          startDate: "not-a-date",
+          medicationName: "",
+          doseLabel: 20,
+          symptomLabels: {
+            heartburn: "",
+            painOrBloating: "nausea",
+          },
+        },
+        records: {},
+      }),
+    );
+
+    const state = loadState();
+
+    expect(state.config.locale).toBe("ru");
+    expect(state.config.startDate).toBe("2026-05-10");
+    expect(state.config.medicationName).toBe("Омез");
+    expect(state.config.doseLabel).toBe("20 мг");
+    expect(state.config.symptomLabels.heartburn).toBe("изжога");
+    expect(state.config.symptomLabels.painOrBloating).toBe("nausea");
+  });
+
+  it("normalizes records by ISO date and known fields", () => {
+    window.localStorage.setItem(
+      STORAGE_KEY_V2,
+      JSON.stringify({
+        config: createDefaultConfig(),
+        records: {
+          "2026-05-10": {
+            done: true,
+            supportMedication: "yes",
+            rescueMedication: false,
+            heartburn: true,
+            note: 123,
+            extra: true,
+          },
+          "not-a-date": {
+            done: true,
+          },
+        },
+      }),
+    );
+
+    expect(loadState().records).toEqual({
+      "2026-05-10": {
+        done: true,
+        rescueMedication: false,
+        heartburn: true,
+      },
+    });
+  });
+
+  it("falls back to default phases when saved phases are invalid", () => {
+    window.localStorage.setItem(
+      STORAGE_KEY_V2,
+      JSON.stringify({
+        config: {
+          ...createDefaultConfig(),
+          phases: [
+            {
+              id: "bad",
+              title: "bad",
+              durationDays: -1,
+              pattern: { type: "unknown" },
+              takeDetails: "",
+              skipDetails: "",
+            },
+          ],
+        },
+        records: {},
+      }),
+    );
+
+    expect(loadState().config.phases.map((phase) => phase.id)).toEqual([
+      "weeks-1-2",
+      "weeks-3-4",
+      "weeks-5-6",
+      "weeks-7-8",
+    ]);
+  });
+
+  it("normalizes custom sequence phases", () => {
+    window.localStorage.setItem(
+      STORAGE_KEY_V2,
+      JSON.stringify({
+        config: {
+          ...createDefaultConfig(),
+          phases: [
+            {
+              id: "custom",
+              title: "Custom",
+              durationDays: 3,
+              pattern: { type: "custom-sequence", sequence: ["take", "bad", "skip"] },
+              takeDetails: "Take",
+              skipDetails: "Skip",
+            },
+          ],
+        },
+        records: {},
+      }),
+    );
+
+    expect(loadState().config.phases[0].pattern).toEqual({
+      type: "custom-sequence",
+      sequence: ["take", "skip"],
+    });
+  });
+
   it("falls back to default state on malformed v2 data", () => {
     window.localStorage.setItem(STORAGE_KEY_V2, "{bad-json");
 

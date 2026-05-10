@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Taper Calendar">
+  <rect width="512" height="512" rx="112" fill="#0f172a"/>
+  <rect x="104" y="116" width="304" height="292" rx="44" fill="#f8fafc"/>
+  <path d="M168 84v72M344 84v72M104 196h304" fill="none" stroke="#0f172a" stroke-width="28" stroke-linecap="round"/>
+  <rect x="148" y="240" width="64" height="54" rx="16" fill="#bfdbfe"/>
+  <rect x="224" y="240" width="64" height="54" rx="16" fill="#dbeafe"/>
+  <rect x="300" y="240" width="64" height="54" rx="16" fill="#fef3c7"/>
+  <rect x="148" y="314" width="64" height="54" rx="16" fill="#dbeafe"/>
+  <rect x="224" y="314" width="64" height="54" rx="16" fill="#fef3c7"/>
+  <rect x="300" y="314" width="64" height="54" rx="16" fill="#bfdbfe"/>
+  <path d="M202 350 246 394 332 286" fill="none" stroke="#2563eb" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
