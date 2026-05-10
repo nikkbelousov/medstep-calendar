@@ -62,6 +62,12 @@ Build:
 pnpm build
 ```
 
+Build for GitHub Pages:
+
+```powershell
+pnpm build:pages
+```
+
 Preview the production build:
 
 ```powershell
@@ -82,7 +88,7 @@ It runs on pushes to `main`:
 
 - `pnpm install --frozen-lockfile`
 - `pnpm test`
-- `pnpm build -- --base "/<repo-name>/"`
+- `pnpm build:pages`
 - deploys `dist` through GitHub Pages artifacts
 
 Initial repository publishing:
