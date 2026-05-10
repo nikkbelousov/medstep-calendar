@@ -79,11 +79,13 @@ Legacy key нужен только для чтения старых локаль
 pnpm install
 pnpm dev
 pnpm build
+pnpm test
 ```
 
 Перед завершением технической задачи запускай:
 
 ```powershell
+pnpm test
 pnpm build
 ```
 

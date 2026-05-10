@@ -92,35 +92,37 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 text-slate-900 md:p-8">
-      <div className="mx-auto max-w-6xl space-y-5">
-        <header className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">
+    <div className="min-h-screen bg-slate-50 px-3 py-4 text-slate-900 sm:p-5 md:p-8">
+      <div className="mx-auto max-w-6xl space-y-4 md:space-y-5">
+        <header className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="mb-3 inline-flex max-w-full items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 sm:text-sm">
                 <CalendarDays className="h-4 w-4" />
-                Старт: {fromISO(config.startDate).toLocaleDateString("ru-RU", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
+                <span className="truncate">
+                  Старт: {fromISO(config.startDate).toLocaleDateString("ru-RU", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
               </div>
               <h1 className="text-2xl font-semibold tracking-normal md:text-3xl">
                 Taper Calendar
               </h1>
-              <p className="mt-2 max-w-2xl text-slate-600">
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
                 {config.medicationName} {config.doseLabel}
                 {config.defaultTime ? `, ${config.defaultTime}` : ""}. Отмечай дни приёма,
                 пропуска, симптомы и поддержку. Данные сохраняются только в этом браузере.
               </p>
             </div>
 
-            <div className="min-w-full space-y-3 md:min-w-[460px]">
-              <div className="flex justify-start md:justify-end">
+            <div className="min-w-full space-y-3 lg:min-w-[460px]">
+              <div className="flex justify-start lg:justify-end">
                 <button
                   type="button"
                   onClick={() => setIsSettingsOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 sm:w-auto"
                 >
                   <SlidersHorizontal className="h-4 w-4" />
                   Настроить
@@ -135,7 +137,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="mt-5 flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          <div className="mt-5 flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-600 sm:p-4">
             <Shield className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
             <p>
               Это личный трекер заданного плана. Он не даёт медицинских советов,
@@ -144,9 +146,9 @@ export default function App() {
           </div>
         </header>
 
-        <main className="grid gap-5 lg:grid-cols-[1fr_380px]">
+        <main className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-5">
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-200 p-4">
+            <div className="flex items-center justify-between border-b border-slate-200 p-2 sm:p-4">
               <button
                 type="button"
                 onClick={() =>
@@ -158,7 +160,7 @@ export default function App() {
                 <ChevronLeft className="h-5 w-5" />
               </button>
 
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-base font-semibold sm:text-lg">
                 {monthNames[viewDate.getMonth()]} {viewDate.getFullYear()}
               </h2>
 
@@ -176,7 +178,7 @@ export default function App() {
 
             <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
               {weekdays.map((day) => (
-                <div key={day} className="p-3 text-center text-sm font-medium text-slate-500">
+                <div key={day} className="min-w-0 p-1.5 text-center text-[11px] font-medium text-slate-500 sm:p-3 sm:text-sm">
                   {day}
                 </div>
               ))}
@@ -196,19 +198,19 @@ export default function App() {
                     type="button"
                     onClick={() => setSelectedISO(iso)}
                     className={[
-                      "relative min-h-[92px] border-b border-r border-slate-100 p-2 text-left transition md:min-h-[112px]",
+                      "relative min-h-[62px] min-w-0 overflow-hidden border-b border-r border-slate-100 p-1 text-left transition sm:min-h-[92px] sm:p-2 md:min-h-[112px]",
                       isCurrentMonth ? "bg-white hover:bg-slate-50" : "bg-slate-50/60 text-slate-400",
                       isSelected ? "z-10 ring-2 ring-inset ring-slate-900" : "",
                     ].join(" ")}
                   >
-                    <div className="mb-2 flex items-center justify-between">
+                    <div className="mb-1 flex min-h-5 items-center justify-between sm:mb-2">
                       <span className="text-sm font-semibold">{date.getDate()}</span>
                       {record?.done ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : null}
                     </div>
 
                     <div
                       className={[
-                        "inline-flex max-w-full items-center gap-1 rounded-xl px-2 py-1 text-[11px] font-medium md:text-xs",
+                        "inline-flex max-w-full items-center gap-1 rounded-full px-1.5 py-1 text-[10px] font-medium sm:rounded-xl sm:px-2 sm:text-[11px] md:text-xs",
                         plan.type === "take" ? "bg-blue-50 text-blue-700" : "",
                         plan.type === "skip" ? "bg-amber-50 text-amber-700" : "",
                         plan.type === "asNeeded" ? "bg-violet-50 text-violet-700" : "",
@@ -220,10 +222,10 @@ export default function App() {
                       ) : (
                         <Shield className="h-3 w-3 shrink-0" />
                       )}
-                      <span className="truncate">{plan.label}</span>
+                      <span className="hidden truncate sm:inline">{plan.label}</span>
                     </div>
 
-                    <div className="mt-2 flex flex-wrap gap-1">
+                    <div className="mt-1 flex flex-wrap gap-1 sm:mt-2">
                       {record?.supportMedication ? <MiniTag>{config.supportMedicationName}</MiniTag> : null}
                       {record?.rescueMedication ? <MiniTag>{config.rescueMedicationName}</MiniTag> : null}
                       {record?.heartburn ? <MiniTag>{config.symptomLabels.heartburn}</MiniTag> : null}
@@ -234,7 +236,7 @@ export default function App() {
             </div>
           </section>
 
-          <aside className="space-y-5">
+          <aside className="space-y-4 lg:space-y-5">
             <DayDetails
               selectedISO={selectedISO}
               selectedPlan={selectedPlan}
@@ -244,7 +246,7 @@ export default function App() {
               onUpdate={updateRecord}
             />
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
               <h3 className="flex items-center gap-2 font-semibold">
                 <Moon className="h-5 w-5" /> Памятка
               </h3>
@@ -286,11 +288,11 @@ function DayDetails({
   onUpdate: (patch: RecordPatch) => void;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="text-sm text-slate-500">Выбранный день</p>
-          <h2 className="mt-1 text-xl font-semibold">
+          <h2 className="mt-1 text-lg font-semibold sm:text-xl">
             {fromISO(selectedISO).toLocaleDateString("ru-RU", {
               day: "numeric",
               month: "long",
@@ -304,6 +306,7 @@ function DayDetails({
           onClick={onReset}
           className="rounded-xl p-2 transition hover:bg-slate-100"
           title="Очистить отметки дня"
+          aria-label="Очистить отметки дня"
         >
           <RotateCcw className="h-4 w-4" />
         </button>
@@ -311,20 +314,20 @@ function DayDetails({
 
       <div
         className={[
-          "mt-4 rounded-2xl border p-4",
+          "mt-4 rounded-2xl border p-3 sm:p-4",
           selectedPlan.type === "take" ? "border-blue-100 bg-blue-50" : "",
           selectedPlan.type === "skip" ? "border-amber-100 bg-amber-50" : "",
           selectedPlan.type === "asNeeded" ? "border-violet-100 bg-violet-50" : "",
           selectedPlan.type === "past" ? "border-slate-100 bg-slate-50" : "",
         ].join(" ")}
       >
-        <div className="flex items-center gap-2 font-semibold">
+        <div className="flex min-w-0 items-center gap-2 font-semibold">
           {selectedPlan.type === "take" ? (
-            <Pill className="h-5 w-5" />
+            <Pill className="h-5 w-5 shrink-0" />
           ) : (
-            <Shield className="h-5 w-5" />
+            <Shield className="h-5 w-5 shrink-0" />
           )}
-          {selectedPlan.label}
+          <span className="min-w-0 break-words">{selectedPlan.label}</span>
         </div>
         <p className="mt-1 text-xs font-medium text-slate-500">{selectedPlan.phaseTitle}</p>
         <p className="mt-2 text-sm text-slate-600">{selectedPlan.details}</p>
@@ -367,7 +370,7 @@ function DayDetails({
           value={selectedRecord.note ?? ""}
           onChange={(event) => onUpdate({ note: event.target.value })}
           placeholder="Например: симптомы после ужина, что помогло, что обсудить с врачом"
-          className="mt-2 min-h-[100px] w-full resize-none rounded-2xl border border-slate-200 p-3 text-sm outline-none focus:ring-2 focus:ring-slate-900"
+          className="mt-2 min-h-[108px] w-full resize-none rounded-2xl border border-slate-200 p-3 text-base outline-none focus:ring-2 focus:ring-slate-900 sm:text-sm"
         />
       </label>
     </section>
@@ -467,9 +470,9 @@ function SettingsModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section className="max-h-[92vh] w-full overflow-y-auto rounded-t-3xl border border-slate-200 bg-white p-5 shadow-xl sm:mx-auto sm:max-w-3xl sm:rounded-2xl sm:p-6">
+      <section className="max-h-[96dvh] w-full overflow-y-auto rounded-t-3xl border border-slate-200 bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl sm:mx-auto sm:max-h-[92vh] sm:max-w-3xl sm:rounded-2xl sm:p-6">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <h3 id="settings-title" className="text-lg font-semibold">
               Настройки плана
             </h3>
@@ -599,30 +602,7 @@ function SettingsModal({
             <CustomSequenceEditor sequence={customSequence} onChange={updateCustomSequence} />
           ) : null}
 
-          <div className="flex flex-col gap-2 border-t border-slate-200 pt-4 sm:flex-row">
-            <button
-              type="submit"
-              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
-            >
-              Сохранить
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            >
-              Отмена
-            </button>
-            <button
-              type="button"
-              onClick={resetToDefault}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            >
-              Сбросить настройки плана
-            </button>
-          </div>
-
-          <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
+          <div className="rounded-2xl border border-red-100 bg-red-50 p-3 sm:p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h4 className="text-sm font-semibold text-red-900">Полный сброс данных</h4>
@@ -634,30 +614,53 @@ function SettingsModal({
                 <button
                   type="button"
                   onClick={() => setIsConfirmingFullReset(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
                 >
                   <Trash2 className="h-4 w-4" />
                   Очистить всё
                 </button>
               ) : (
-                <div className="flex shrink-0 gap-2">
+                <div className="grid shrink-0 grid-cols-2 gap-2 sm:flex">
                   <button
                     type="button"
                     onClick={onResetAll}
-                    className="rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-800"
+                    className="min-h-11 rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-800"
                   >
                     Подтвердить
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsConfirmingFullReset(false)}
-                    className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
+                    className="min-h-11 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
                   >
                     Отмена
                   </button>
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="sticky bottom-0 -mx-4 flex flex-col gap-2 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:flex-row sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-4">
+            <button
+              type="submit"
+              className="min-h-11 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+            >
+              Сохранить
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="min-h-11 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Отмена
+            </button>
+            <button
+              type="button"
+              onClick={resetToDefault}
+              className="min-h-11 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Сбросить настройки плана
+            </button>
           </div>
         </form>
       </section>
@@ -681,9 +684,9 @@ function CustomSequenceEditor({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <h4 className="text-sm font-semibold text-slate-800">Своя последовательность</h4>
           <p className="mt-1 text-sm text-slate-500">
             Дни повторяются по кругу. Например: приём, пропуск, пропуск.
@@ -692,7 +695,7 @@ function CustomSequenceEditor({
         <button
           type="button"
           onClick={() => onChange([...sequence, "skip"])}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
         >
           <Plus className="h-4 w-4" />
           День
@@ -701,7 +704,7 @@ function CustomSequenceEditor({
 
       <div className="mt-4 space-y-3">
         {sequence.map((step, index) => (
-          <div key={`${step}-${index}`} className="flex flex-col gap-2 rounded-xl bg-white p-3 sm:flex-row sm:items-center">
+          <div key={`${step}-${index}`} className="flex flex-col gap-2 rounded-xl bg-white p-2.5 sm:flex-row sm:items-center sm:p-3">
             <span className="w-16 shrink-0 text-sm font-medium text-slate-500">День {index + 1}</span>
             <div className="grid flex-1 grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
               {(["take", "skip", "asNeeded"] satisfies CustomSequenceStep[]).map((option) => (
@@ -710,7 +713,7 @@ function CustomSequenceEditor({
                   type="button"
                   onClick={() => updateStep(index, option)}
                   className={[
-                    "rounded-lg px-2 py-1.5 text-xs font-medium transition",
+                    "min-h-10 rounded-lg px-2 py-1.5 text-xs font-medium transition",
                     step === option ? stepActiveClass(option) : "text-slate-600 hover:bg-white",
                   ].join(" ")}
                 >
@@ -722,7 +725,7 @@ function CustomSequenceEditor({
               type="button"
               onClick={() => removeStep(index)}
               disabled={sequence.length <= 1}
-              className="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="min-h-10 rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={`Удалить день ${index + 1}`}
             >
               <Trash2 className="h-4 w-4" />
@@ -731,7 +734,7 @@ function CustomSequenceEditor({
         ))}
       </div>
 
-      <div className="mt-3 rounded-xl bg-white px-3 py-2 text-sm text-slate-600">
+      <div className="mt-3 rounded-xl bg-white px-3 py-2 text-sm leading-6 text-slate-600">
         Повтор: {sequence.map(stepLabel).join(" → ")}. Цикл: {sequence.length}{" "}
         {getDayWord(sequence.length)}.
       </div>
@@ -785,17 +788,17 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+    <div className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-2.5 sm:p-3">
       <div className="text-xl font-semibold">{value}</div>
-      <div className="mt-1 text-xs text-slate-500">{label}</div>
+      <div className="mt-1 truncate text-xs text-slate-500">{label}</div>
     </div>
   );
 }
 
 function MiniTag({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600">
-      {children}
+    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-slate-400 text-[0px] text-transparent sm:h-auto sm:w-auto sm:bg-slate-100 sm:px-2 sm:py-0.5 sm:text-[10px] sm:text-slate-600">
+      <span className="hidden sm:inline">{children}</span>
     </span>
   );
 }
@@ -813,9 +816,9 @@ function Toggle({
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-left transition hover:bg-slate-50"
+      className="flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-left transition hover:bg-slate-50"
     >
-      <span className="text-sm font-medium">{label}</span>
+      <span className="min-w-0 break-words text-sm font-medium">{label}</span>
       {checked ? (
         <CheckCircle2 className="h-5 w-5 text-emerald-600" />
       ) : (
