@@ -25,12 +25,14 @@ export interface DayRecord {
 
 export type Records = Record<ISODate, DayRecord>;
 
+export type CustomSequenceStep = "take" | "skip" | "asNeeded";
+
 export type PhasePattern =
   | { type: "skip-weekdays"; weekdays: number[] }
   | { type: "every-n-days"; interval: number; takeOnRemainder: number }
   | { type: "take-every-day" }
   | { type: "as-needed" }
-  | { type: "custom-sequence"; sequence: Array<"take" | "skip" | "asNeeded"> };
+  | { type: "custom-sequence"; sequence: CustomSequenceStep[] };
 
 export interface TaperPhase {
   id: string;
@@ -69,13 +71,13 @@ export const medicationOptions = [
 ];
 
 export const phasePresetOptions = [
-  { value: "omez", label: "Омез-прототип" },
+  { value: "omez", label: "Базовый 8-недельный план" },
   { value: "six-one", label: "6/1" },
   { value: "five-two", label: "5/2" },
   { value: "every-other-day", label: "Через день" },
   { value: "every-third-day", label: "1 раз в 3 дня" },
   { value: "as-needed", label: "По требованию" },
-  { value: "custom", label: "Custom pattern" },
+  { value: "custom", label: "Своя последовательность" },
 ] as const;
 
 export type PhasePresetId = (typeof phasePresetOptions)[number]["value"];
@@ -170,7 +172,7 @@ export function createPresetPhases(preset: PhasePresetId, customSequence = "take
     return [
       {
         id: "custom",
-        title: "Custom pattern",
+        title: "Своя последовательность",
         durationDays: 56,
         pattern: { type: "custom-sequence", sequence: parseCustomSequence(customSequence) },
         takeDetails: defaultTakeDetails,
@@ -216,7 +218,7 @@ export function createPresetPhases(preset: PhasePresetId, customSequence = "take
   ];
 }
 
-export function parseCustomSequence(value: string): Array<"take" | "skip" | "asNeeded"> {
+export function parseCustomSequence(value: string): CustomSequenceStep[] {
   const parsed = value
     .split(",")
     .map((item) => item.trim().toLowerCase())
@@ -226,12 +228,12 @@ export function parseCustomSequence(value: string): Array<"take" | "skip" | "asN
       if (item === "asneeded" || item === "as-needed" || item === "по требованию") return "asNeeded";
       return undefined;
     })
-    .filter((item): item is "take" | "skip" | "asNeeded" => Boolean(item));
+    .filter((item): item is CustomSequenceStep => Boolean(item));
 
   return parsed.length > 0 ? parsed : ["take", "skip"];
 }
 
-export function sequenceToInputValue(sequence: Array<"take" | "skip" | "asNeeded">): string {
+export function sequenceToInputValue(sequence: CustomSequenceStep[]): string {
   return sequence.join(",");
 }
 
@@ -304,7 +306,7 @@ function getTypeForPhaseDay(
     return phaseDayOffset % pattern.interval === pattern.takeOnRemainder ? "take" : "skip";
   }
 
-  const fallbackSequence: Array<"take" | "skip" | "asNeeded"> = ["take", "skip"];
+  const fallbackSequence: CustomSequenceStep[] = ["take", "skip"];
   const sequence = pattern.sequence.length > 0 ? pattern.sequence : fallbackSequence;
   return sequence[phaseDayOffset % sequence.length];
 }
