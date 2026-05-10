@@ -5,6 +5,7 @@ import {
   type Records,
 } from "./plan";
 import type { ISODate } from "./date";
+import { DEFAULT_LOCALE, isLocale } from "./i18n";
 
 export const STORAGE_KEY_V2 = "taper-calendar-v2";
 export const STORAGE_KEY_V1 = "omez-taper-calendar-v1";
@@ -34,7 +35,7 @@ export function loadState(): AppState {
     const savedV2 = window.localStorage.getItem(STORAGE_KEY_V2);
     if (savedV2) {
       const parsed = safeParse(savedV2);
-      if (isAppState(parsed)) return parsed;
+      if (isAppState(parsed)) return normalizeAppState(parsed);
     }
 
     const savedV1 = window.localStorage.getItem(STORAGE_KEY_V1);
@@ -52,6 +53,17 @@ export function loadState(): AppState {
   } catch {
     return createDefaultState();
   }
+}
+
+export function normalizeAppState(state: AppState): AppState {
+  return {
+    ...state,
+    config: {
+      ...state.config,
+      locale: isLocale(state.config.locale) ? state.config.locale : DEFAULT_LOCALE,
+    },
+    records: state.records ?? {},
+  };
 }
 
 export function saveState(state: AppState): void {

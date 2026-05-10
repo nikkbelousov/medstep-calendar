@@ -65,6 +65,20 @@ describe("storage", () => {
     expect(loadState()).toEqual(state);
   });
 
+  it("normalizes old v2 state without locale", () => {
+    const legacyV2State = {
+      config: {
+        ...createDefaultConfig(),
+        locale: undefined,
+      },
+      records: {},
+    };
+
+    window.localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(legacyV2State));
+
+    expect(loadState().config.locale).toBe("ru");
+  });
+
   it("falls back to default state on malformed v2 data", () => {
     window.localStorage.setItem(STORAGE_KEY_V2, "{bad-json");
 

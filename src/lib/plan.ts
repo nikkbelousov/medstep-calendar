@@ -1,4 +1,5 @@
 import { dayDiff, fromISO, type ISODate } from "./date";
+import { DEFAULT_LOCALE, t, type Locale, type TranslationKey } from "./i18n";
 
 export type PlanDayType = "take" | "skip" | "asNeeded" | "past";
 
@@ -45,6 +46,7 @@ export interface TaperPhase {
 }
 
 export interface AppConfig {
+  locale: Locale;
   startDate: ISODate;
   medicationName: string;
   doseLabel: string;
@@ -87,6 +89,7 @@ const defaultTakeDetails =
 
 export function createDefaultConfig(): AppConfig {
   return {
+    locale: DEFAULT_LOCALE,
     startDate: "2026-05-10",
     medicationName: "Омез",
     doseLabel: "20 мг",
@@ -252,9 +255,15 @@ export function inferPhasePreset(phases: TaperPhase[]): PhasePresetId {
 }
 
 export function getPlanForDate(iso: ISODate, config: AppConfig): PlanDay {
+  const locale = config.locale ?? DEFAULT_LOCALE;
   const diff = dayDiff(iso, config.startDate);
   if (diff < 0) {
-    return { type: "past", label: "До старта", details: "План ещё не начат", phaseTitle: "До старта" };
+    return {
+      type: "past",
+      label: t(locale, "planBeforeStart"),
+      details: t(locale, "planNotStarted"),
+      phaseTitle: t(locale, "planBeforeStart"),
+    };
   }
 
   let phaseStartOffset = 0;
@@ -270,9 +279,9 @@ export function getPlanForDate(iso: ISODate, config: AppConfig): PlanDay {
 
   return {
     type: "asNeeded",
-    label: "По требованию",
-    details: renderTemplate("{medication} только по заранее согласованному плану.", config),
-    phaseTitle: "После плана",
+    label: t(locale, "actionAsNeeded"),
+    details: renderTemplate(getLocalizedDetails("asNeeded", "after-plan", locale), config),
+    phaseTitle: t(locale, "planAfter"),
   };
 }
 
@@ -312,30 +321,76 @@ function getTypeForPhaseDay(
 }
 
 function createPlanDay(type: "take" | "skip" | "asNeeded", phase: TaperPhase, config: AppConfig): PlanDay {
+  const locale = config.locale ?? DEFAULT_LOCALE;
   if (type === "take") {
     return {
       type,
       label: [config.medicationName, config.defaultTime].filter(Boolean).join(" "),
-      details: renderTemplate(phase.takeDetails, config),
-      phaseTitle: phase.title,
+      details: renderTemplate(getLocalizedDetails("take", phase.id, locale, phase.takeDetails), config),
+      phaseTitle: getLocalizedPhaseTitle(phase, locale),
     };
   }
 
   if (type === "asNeeded") {
     return {
       type,
-      label: "По требованию",
-      details: renderTemplate(phase.asNeededDetails ?? "{medication} только по заранее согласованному плану.", config),
-      phaseTitle: phase.title,
+      label: t(locale, "actionAsNeeded"),
+      details: renderTemplate(
+        getLocalizedDetails(
+          "asNeeded",
+          phase.id,
+          locale,
+          phase.asNeededDetails ?? "{medication} только по заранее согласованному плану.",
+        ),
+        config,
+      ),
+      phaseTitle: getLocalizedPhaseTitle(phase, locale),
     };
   }
 
   return {
     type,
-    label: "Пропуск",
-    details: renderTemplate(phase.skipDetails, config),
-    phaseTitle: phase.title,
+    label: t(locale, "actionSkip"),
+    details: renderTemplate(getLocalizedDetails("skip", phase.id, locale, phase.skipDetails), config),
+    phaseTitle: getLocalizedPhaseTitle(phase, locale),
   };
+}
+
+function getLocalizedPhaseTitle(phase: TaperPhase, locale: Locale): string {
+  const titleKeys: Record<string, TranslationKey> = {
+    "six-one": "presetSixOne",
+    "five-two": "presetFiveTwo",
+    "every-other-day": "presetEveryOtherDay",
+    "every-third-day": "presetEveryThirdDay",
+    "as-needed": "presetAsNeeded",
+    custom: "presetCustom",
+    "weeks-1-2": "presetSixOne",
+    "weeks-3-4": "presetFiveTwo",
+    "weeks-5-6": "presetEveryOtherDay",
+    "weeks-7-8": "presetEveryThirdDay",
+  };
+
+  const key = titleKeys[phase.id];
+  return key ? t(locale, key) : phase.title;
+}
+
+function getLocalizedDetails(
+  type: "take" | "skip" | "asNeeded",
+  phaseId: string,
+  locale: Locale,
+  fallback = "",
+): string {
+  if (locale === "ru") return fallback || "{medication} только по заранее согласованному плану.";
+  if (locale === "hy") {
+    if (type === "take") return "{medication} {dose} {time}.";
+    if (type === "asNeeded") return "{medication} միայն նախապես սահմանված պլանի համաձայն։";
+    return "Առանց {medication}. {support}/{rescue}՝ ըստ նախապես սահմանված պլանի։";
+  }
+
+  if (type === "take") return "{medication} {dose} {time}.";
+  if (type === "asNeeded") return "{medication} only according to the predefined plan.";
+  if (phaseId === "after-plan") return "{medication} only according to the predefined plan.";
+  return "No planned {medication}. {support}/{rescue} according to the predefined plan.";
 }
 
 function renderTemplate(template: string, config: AppConfig): string {

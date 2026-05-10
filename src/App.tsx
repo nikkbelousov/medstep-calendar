@@ -7,7 +7,16 @@ import {
   type ReactNode,
   type SVGProps,
 } from "react";
-import { fromISO, getMonthMatrix, monthNames, toISO, weekdays } from "./lib/date";
+import { fromISO, getMonthMatrix, toISO } from "./lib/date";
+import {
+  localeDateCodes,
+  localeOptions,
+  localizedMonthNames,
+  localizedWeekdays,
+  t,
+  type Locale,
+  type TranslationKey,
+} from "./lib/i18n";
 import {
   createDefaultConfig,
   createPresetPhases,
@@ -35,6 +44,7 @@ export default function App() {
   const [viewDate, setViewDate] = useState<Date>(start);
   const [selectedISO, setSelectedISO] = useState(config.startDate);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const locale = config.locale;
 
   useEffect(() => {
     saveState(state);
@@ -83,6 +93,13 @@ export default function App() {
     setState((previous) => ({ ...previous, config: nextConfig }));
   }
 
+  function updateLocale(nextLocale: Locale): void {
+    setState((previous) => ({
+      ...previous,
+      config: { ...previous.config, locale: nextLocale },
+    }));
+  }
+
   function resetAllData(): void {
     const nextState = createDefaultState();
     setState(nextState);
@@ -100,7 +117,7 @@ export default function App() {
               <div className="mb-3 inline-flex max-w-full items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 sm:text-sm">
                 <CalendarDays className="h-4 w-4" />
                 <span className="truncate">
-                  Старт: {fromISO(config.startDate).toLocaleDateString("ru-RU", {
+                  {t(locale, "appStart")}: {fromISO(config.startDate).toLocaleDateString(localeDateCodes[locale], {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
@@ -112,37 +129,34 @@ export default function App() {
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
                 {config.medicationName} {config.doseLabel}
-                {config.defaultTime ? `, ${config.defaultTime}` : ""}. Отмечай дни приёма,
-                пропуска, симптомы и поддержку. Данные сохраняются только в этом браузере.
+                {config.defaultTime ? `, ${config.defaultTime}` : ""}. {t(locale, "appSummaryPrefix")}
               </p>
             </div>
 
             <div className="min-w-full space-y-3 lg:min-w-[460px]">
-              <div className="flex justify-start lg:justify-end">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center lg:justify-end">
+                <LocaleSwitcher locale={locale} onChange={updateLocale} />
                 <button
                   type="button"
                   onClick={() => setIsSettingsOpen(true)}
                   className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 sm:w-auto"
                 >
                   <SlidersHorizontal className="h-4 w-4" />
-                  Настроить
+                  {t(locale, "configure")}
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <Stat label="Дней плана" value={stats.total} />
-                <Stat label="Приём" value={stats.take} />
-                <Stat label="Пропуск" value={stats.skip} />
-                <Stat label="Отмечено" value={stats.done} />
+                <Stat label={t(locale, "statTotal")} value={stats.total} />
+                <Stat label={t(locale, "statTake")} value={stats.take} />
+                <Stat label={t(locale, "statSkip")} value={stats.skip} />
+                <Stat label={t(locale, "statDone")} value={stats.done} />
               </div>
             </div>
           </div>
 
           <div className="mt-5 flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-600 sm:p-4">
             <Shield className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
-            <p>
-              Это личный трекер заданного плана. Он не даёт медицинских советов,
-              диагнозов или рекомендаций по лечению.
-            </p>
+            <p>{t(locale, "disclaimer")}</p>
           </div>
         </header>
 
@@ -155,13 +169,13 @@ export default function App() {
                   setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
                 }
                 className="rounded-xl p-2 transition hover:bg-slate-100"
-                aria-label="Предыдущий месяц"
+                aria-label={t(locale, "previousMonth")}
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
 
               <h2 className="text-base font-semibold sm:text-lg">
-                {monthNames[viewDate.getMonth()]} {viewDate.getFullYear()}
+                {localizedMonthNames[locale][viewDate.getMonth()]} {viewDate.getFullYear()}
               </h2>
 
               <button
@@ -170,14 +184,14 @@ export default function App() {
                   setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
                 }
                 className="rounded-xl p-2 transition hover:bg-slate-100"
-                aria-label="Следующий месяц"
+                aria-label={t(locale, "nextMonth")}
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
 
             <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
-              {weekdays.map((day) => (
+              {localizedWeekdays[locale].map((day) => (
                 <div key={day} className="min-w-0 p-1.5 text-center text-[11px] font-medium text-slate-500 sm:p-3 sm:text-sm">
                   {day}
                 </div>
@@ -242,18 +256,19 @@ export default function App() {
               selectedPlan={selectedPlan}
               selectedRecord={selectedRecord}
               config={config}
+              locale={locale}
               onReset={resetDay}
               onUpdate={updateRecord}
             />
 
             <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
               <h3 className="flex items-center gap-2 font-semibold">
-                <Moon className="h-5 w-5" /> Памятка
+                <Moon className="h-5 w-5" /> {t(locale, "reminder")}
               </h3>
               <div className="mt-3 space-y-2 text-sm text-slate-600">
-                <p>• Памятка отображает только заданный пользователем план.</p>
-                <p>• Изменения препаратов, доз и схем нужно согласовывать с врачом.</p>
-                <p>• Данные сохраняются локально в этом браузере.</p>
+                <p>• {t(locale, "reminderPlan")}</p>
+                <p>• {t(locale, "reminderDoctor")}</p>
+                <p>• {t(locale, "reminderLocal")}</p>
               </div>
             </section>
           </aside>
@@ -277,6 +292,7 @@ function DayDetails({
   selectedPlan,
   selectedRecord,
   config,
+  locale,
   onReset,
   onUpdate,
 }: {
@@ -284,6 +300,7 @@ function DayDetails({
   selectedPlan: ReturnType<typeof getPlanForDate>;
   selectedRecord: DayRecord;
   config: AppConfig;
+  locale: Locale;
   onReset: () => void;
   onUpdate: (patch: RecordPatch) => void;
 }) {
@@ -291,9 +308,9 @@ function DayDetails({
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm text-slate-500">Выбранный день</p>
+          <p className="text-sm text-slate-500">{t(locale, "selectedDay")}</p>
           <h2 className="mt-1 text-lg font-semibold sm:text-xl">
-            {fromISO(selectedISO).toLocaleDateString("ru-RU", {
+            {fromISO(selectedISO).toLocaleDateString(localeDateCodes[locale], {
               day: "numeric",
               month: "long",
               weekday: "long",
@@ -305,8 +322,8 @@ function DayDetails({
           type="button"
           onClick={onReset}
           className="rounded-xl p-2 transition hover:bg-slate-100"
-          title="Очистить отметки дня"
-          aria-label="Очистить отметки дня"
+          title={t(locale, "clearDay")}
+          aria-label={t(locale, "clearDay")}
         >
           <RotateCcw className="h-4 w-4" />
         </button>
@@ -332,7 +349,7 @@ function DayDetails({
         <p className="mt-1 text-xs font-medium text-slate-500">{selectedPlan.phaseTitle}</p>
         <p className="mt-2 text-sm text-slate-600">{selectedPlan.details}</p>
         <p className="mt-3 text-xs text-slate-500">
-          Это отображение заданного плана, не медицинская рекомендация.
+          {t(locale, "notMedicalRecommendation")}
         </p>
       </div>
 
@@ -340,36 +357,36 @@ function DayDetails({
         <Toggle
           checked={!!selectedRecord.done}
           onChange={(value) => onUpdate({ done: value })}
-          label="День выполнен"
+          label={t(locale, "dayDone")}
         />
         <Toggle
           checked={!!selectedRecord.supportMedication}
           onChange={(value) => onUpdate({ supportMedication: value })}
-          label={`Пил ${config.supportMedicationName}`}
+          label={t(locale, "usedSupport", { name: config.supportMedicationName })}
         />
         <Toggle
           checked={!!selectedRecord.rescueMedication}
           onChange={(value) => onUpdate({ rescueMedication: value })}
-          label={`Пил ${config.rescueMedicationName}`}
+          label={t(locale, "usedRescue", { name: config.rescueMedicationName })}
         />
         <Toggle
           checked={!!selectedRecord.heartburn}
           onChange={(value) => onUpdate({ heartburn: value })}
-          label={`Была ${config.symptomLabels.heartburn}`}
+          label={t(locale, "hadSymptom", { name: config.symptomLabels.heartburn })}
         />
         <Toggle
           checked={!!selectedRecord.painOrBloating}
           onChange={(value) => onUpdate({ painOrBloating: value })}
-          label={`Была ${config.symptomLabels.painOrBloating}`}
+          label={t(locale, "hadSymptom", { name: config.symptomLabels.painOrBloating })}
         />
       </div>
 
       <label className="mt-5 block">
-        <span className="text-sm font-medium text-slate-700">Заметка</span>
+        <span className="text-sm font-medium text-slate-700">{t(locale, "note")}</span>
         <textarea
           value={selectedRecord.note ?? ""}
           onChange={(event) => onUpdate({ note: event.target.value })}
-          placeholder="Например: симптомы после ужина, что помогло, что обсудить с врачом"
+          placeholder={t(locale, "notePlaceholder")}
           className="mt-2 min-h-[108px] w-full resize-none rounded-2xl border border-slate-200 p-3 text-base outline-none focus:ring-2 focus:ring-slate-900 sm:text-sm"
         />
       </label>
@@ -392,6 +409,7 @@ function SettingsModal({
   const [selectedPreset, setSelectedPreset] = useState<PhasePresetId>("omez");
   const [customSequence, setCustomSequence] = useState<CustomSequenceStep[]>(["take", "skip"]);
   const [isConfirmingFullReset, setIsConfirmingFullReset] = useState(false);
+  const locale = draft.locale;
 
   useEffect(() => {
     setDraft(config);
@@ -453,7 +471,7 @@ function SettingsModal({
   }
 
   function resetToDefault(): void {
-    const nextConfig = createDefaultConfig();
+    const nextConfig = { ...createDefaultConfig(), locale: draft.locale };
     setSelectedPreset("omez");
     setCustomSequence(["take", "skip"]);
     setDraft(nextConfig);
@@ -474,24 +492,31 @@ function SettingsModal({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h3 id="settings-title" className="text-lg font-semibold">
-              Настройки плана
+              {t(locale, "settingsTitle")}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              Настройки меняют плановые статусы, но не удаляют отметки по датам.
+              {t(locale, "settingsDescription")}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-xl p-2 transition hover:bg-slate-100"
-            aria-label="Закрыть настройки"
+            aria-label={t(locale, "closeSettings")}
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
-          <Field label="Дата старта">
+          <Field label={t(locale, "language")}>
+            <LocaleSwitcher
+              locale={draft.locale}
+              onChange={(nextLocale) => updateDraft({ locale: nextLocale })}
+            />
+          </Field>
+
+          <Field label={t(locale, "startDate")}>
             <input
               type="date"
               value={draft.startDate}
@@ -500,7 +525,7 @@ function SettingsModal({
             />
           </Field>
 
-          <Field label="Препарат">
+          <Field label={t(locale, "medication")}>
             <select
               value={medicationSelectValue}
               onChange={(event) => {
@@ -511,26 +536,26 @@ function SettingsModal({
             >
               {medicationOptions.map((option) => (
                 <option key={option} value={option}>
-                  {option}
+                  {option === "Другое" ? t(locale, "other") : option}
                 </option>
               ))}
             </select>
           </Field>
 
           {medicationSelectValue === "Другое" ? (
-            <Field label="Своё название">
+            <Field label={t(locale, "customName")}>
               <input
                 type="text"
                 value={draft.medicationName}
                 onChange={(event) => updateDraft({ medicationName: event.target.value })}
                 className="form-input"
-                placeholder="Например: мой препарат"
+                placeholder={t(locale, "customNamePlaceholder")}
               />
             </Field>
           ) : null}
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Доза">
+            <Field label={t(locale, "dose")}>
               <input
                 type="text"
                 value={draft.doseLabel}
@@ -539,7 +564,7 @@ function SettingsModal({
                 placeholder="20 мг"
               />
             </Field>
-            <Field label="Время">
+            <Field label={t(locale, "time")}>
               <input
                 type="text"
                 value={draft.defaultTime}
@@ -551,7 +576,7 @@ function SettingsModal({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Поддержка">
+            <Field label={t(locale, "support")}>
               <input
                 type="text"
                 value={draft.supportMedicationName}
@@ -559,7 +584,7 @@ function SettingsModal({
                 className="form-input"
               />
             </Field>
-            <Field label="Резерв">
+            <Field label={t(locale, "rescue")}>
               <input
                 type="text"
                 value={draft.rescueMedicationName}
@@ -570,7 +595,7 @@ function SettingsModal({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Симптом 1">
+            <Field label={t(locale, "symptomOne")}>
               <input
                 type="text"
                 value={draft.symptomLabels.heartburn}
@@ -578,7 +603,7 @@ function SettingsModal({
                 className="form-input"
               />
             </Field>
-            <Field label="Симптом 2">
+            <Field label={t(locale, "symptomTwo")}>
               <input
                 type="text"
                 value={draft.symptomLabels.painOrBloating}
@@ -588,26 +613,30 @@ function SettingsModal({
             </Field>
           </div>
 
-          <Field label="Схема">
+          <Field label={t(locale, "schedule")}>
             <select value={selectedPreset} onChange={handlePresetChange} className="form-input">
               {phasePresetOptions.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {option.label}
+                  {phasePresetLabel(option.value, locale)}
                 </option>
               ))}
             </select>
           </Field>
 
           {selectedPreset === "custom" ? (
-            <CustomSequenceEditor sequence={customSequence} onChange={updateCustomSequence} />
+            <CustomSequenceEditor
+              locale={locale}
+              sequence={customSequence}
+              onChange={updateCustomSequence}
+            />
           ) : null}
 
           <div className="rounded-2xl border border-red-100 bg-red-50 p-3 sm:p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h4 className="text-sm font-semibold text-red-900">Полный сброс данных</h4>
+                <h4 className="text-sm font-semibold text-red-900">{t(locale, "fullResetTitle")}</h4>
                 <p className="mt-1 text-sm text-red-700">
-                  Удалит настройки и все отметки из этого браузера. Действие нельзя отменить.
+                  {t(locale, "fullResetDescription")}
                 </p>
               </div>
               {!isConfirmingFullReset ? (
@@ -617,7 +646,7 @@ function SettingsModal({
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Очистить всё
+                  {t(locale, "clearAll")}
                 </button>
               ) : (
                 <div className="grid shrink-0 grid-cols-2 gap-2 sm:flex">
@@ -626,14 +655,14 @@ function SettingsModal({
                     onClick={onResetAll}
                     className="min-h-11 rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-800"
                   >
-                    Подтвердить
+                    {t(locale, "confirm")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsConfirmingFullReset(false)}
                     className="min-h-11 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
                   >
-                    Отмена
+                    {t(locale, "cancel")}
                   </button>
                 </div>
               )}
@@ -645,21 +674,21 @@ function SettingsModal({
               type="submit"
               className="min-h-11 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
             >
-              Сохранить
+              {t(locale, "save")}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="min-h-11 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
-              Отмена
+              {t(locale, "cancel")}
             </button>
             <button
               type="button"
               onClick={resetToDefault}
               className="min-h-11 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
-              Сбросить настройки плана
+              {t(locale, "resetPlanSettings")}
             </button>
           </div>
         </form>
@@ -669,9 +698,11 @@ function SettingsModal({
 }
 
 function CustomSequenceEditor({
+  locale,
   sequence,
   onChange,
 }: {
+  locale: Locale;
   sequence: CustomSequenceStep[];
   onChange: (sequence: CustomSequenceStep[]) => void;
 }) {
@@ -687,9 +718,9 @@ function CustomSequenceEditor({
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h4 className="text-sm font-semibold text-slate-800">Своя последовательность</h4>
+          <h4 className="text-sm font-semibold text-slate-800">{t(locale, "customSequenceTitle")}</h4>
           <p className="mt-1 text-sm text-slate-500">
-            Дни повторяются по кругу. Например: приём, пропуск, пропуск.
+            {t(locale, "customSequenceDescription")}
           </p>
         </div>
         <button
@@ -698,14 +729,16 @@ function CustomSequenceEditor({
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
         >
           <Plus className="h-4 w-4" />
-          День
+          {t(locale, "addDay")}
         </button>
       </div>
 
       <div className="mt-4 space-y-3">
         {sequence.map((step, index) => (
           <div key={`${step}-${index}`} className="flex flex-col gap-2 rounded-xl bg-white p-2.5 sm:flex-row sm:items-center sm:p-3">
-            <span className="w-16 shrink-0 text-sm font-medium text-slate-500">День {index + 1}</span>
+            <span className="w-16 shrink-0 text-sm font-medium text-slate-500">
+              {t(locale, "dayNumber", { number: index + 1 })}
+            </span>
             <div className="grid flex-1 grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
               {(["take", "skip", "asNeeded"] satisfies CustomSequenceStep[]).map((option) => (
                 <button
@@ -717,7 +750,7 @@ function CustomSequenceEditor({
                     step === option ? stepActiveClass(option) : "text-slate-600 hover:bg-white",
                   ].join(" ")}
                 >
-                  {stepLabel(option)}
+                  {stepLabel(option, locale)}
                 </button>
               ))}
             </div>
@@ -726,7 +759,7 @@ function CustomSequenceEditor({
               onClick={() => removeStep(index)}
               disabled={sequence.length <= 1}
               className="min-h-10 rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label={`Удалить день ${index + 1}`}
+              aria-label={t(locale, "removeDay", { number: index + 1 })}
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -735,32 +768,33 @@ function CustomSequenceEditor({
       </div>
 
       <div className="mt-3 rounded-xl bg-white px-3 py-2 text-sm leading-6 text-slate-600">
-        Повтор: {sequence.map(stepLabel).join(" → ")}. Цикл: {sequence.length}{" "}
-        {getDayWord(sequence.length)}.
+        {t(locale, "repeat")}: {sequence.map((step) => stepLabel(step, locale)).join(" → ")}.{" "}
+        {t(locale, "cycle")}: {t(locale, "daysUnit", { count: sequence.length })}.
       </div>
     </div>
   );
 }
 
 function normalizeConfig(config: AppConfig): AppConfig {
+  const locale = config.locale;
   return {
     ...config,
-    medicationName: config.medicationName.trim() || "Препарат",
+    medicationName: config.medicationName.trim() || t(locale, "defaultMedication"),
     doseLabel: config.doseLabel.trim(),
     defaultTime: config.defaultTime.trim(),
-    supportMedicationName: config.supportMedicationName.trim() || "Поддержка",
-    rescueMedicationName: config.rescueMedicationName.trim() || "Резерв",
+    supportMedicationName: config.supportMedicationName.trim() || t(locale, "defaultSupport"),
+    rescueMedicationName: config.rescueMedicationName.trim() || t(locale, "defaultRescue"),
     symptomLabels: {
-      heartburn: config.symptomLabels.heartburn.trim() || "симптом",
-      painOrBloating: config.symptomLabels.painOrBloating.trim() || "симптом",
+      heartburn: config.symptomLabels.heartburn.trim() || t(locale, "defaultSymptom"),
+      painOrBloating: config.symptomLabels.painOrBloating.trim() || t(locale, "defaultSymptom"),
     },
   };
 }
 
-function stepLabel(step: CustomSequenceStep): string {
-  if (step === "take") return "Приём";
-  if (step === "skip") return "Пропуск";
-  return "По требованию";
+function stepLabel(step: CustomSequenceStep, locale: Locale): string {
+  if (step === "take") return t(locale, "actionTake");
+  if (step === "skip") return t(locale, "actionSkip");
+  return t(locale, "actionAsNeeded");
 }
 
 function stepActiveClass(step: CustomSequenceStep): string {
@@ -769,12 +803,45 @@ function stepActiveClass(step: CustomSequenceStep): string {
   return "bg-violet-600 text-white";
 }
 
-function getDayWord(count: number): string {
-  const lastDigit = count % 10;
-  const lastTwoDigits = count % 100;
-  if (lastDigit === 1 && lastTwoDigits !== 11) return "день";
-  if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)) return "дня";
-  return "дней";
+function phasePresetLabel(preset: PhasePresetId, locale: Locale): string {
+  const keys: Record<PhasePresetId, TranslationKey> = {
+    omez: "presetBase",
+    "six-one": "presetSixOne",
+    "five-two": "presetFiveTwo",
+    "every-other-day": "presetEveryOtherDay",
+    "every-third-day": "presetEveryThirdDay",
+    "as-needed": "presetAsNeeded",
+    custom: "presetCustom",
+  };
+
+  return t(locale, keys[preset]);
+}
+
+function LocaleSwitcher({
+  locale,
+  onChange,
+}: {
+  locale: Locale;
+  onChange: (locale: Locale) => void;
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1" aria-label={t(locale, "language")}>
+      {localeOptions.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={[
+            "min-h-9 rounded-lg px-3 text-xs font-semibold transition",
+            locale === option.value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:bg-white/70",
+          ].join(" ")}
+          aria-pressed={locale === option.value}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
