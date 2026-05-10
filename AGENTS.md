@@ -114,11 +114,13 @@ Important:
 
 ---
 
-## Phase 1 Goal: Recreate the Prototype
+## Phase 1 Status
 
-Implement a working local app that visually and functionally matches the reference prototype.
+Phase 1 is complete. The fixed Omez prototype has been recreated as a working local Vite + React + TypeScript + Tailwind app.
 
-Required behavior:
+Keep this baseline stable before starting universal Phase 2 work.
+
+Verified baseline behavior:
 
 - Monthly calendar grid.
 - Monday-first week layout.
@@ -135,7 +137,7 @@ Required behavior:
 - No database.
 - No analytics.
 
-Definition of done for Phase 1:
+Phase 1 definition of done was met:
 
 - `pnpm install` succeeds.
 - `pnpm dev` starts the app.
@@ -187,37 +189,11 @@ Persistence:
 
 ---
 
-## Suggested Project Structure
+## Current Project Structure
 
-Use a simple structure:
+The working Phase 1 app intentionally keeps most logic in `src/App.tsx`.
 
-/
-├─ AGENTS.md
-├─ README.md
-├─ package.json
-├─ index.html
-├─ vite.config.ts
-├─ tailwind.config.js
-├─ postcss.config.js
-└─ src/
-├─ main.tsx
-├─ App.tsx
-├─ styles.css
-├─ components/
-│ ├─ CalendarGrid.tsx
-│ ├─ DayDetails.tsx
-│ ├─ Toggle.tsx
-│ └─ Icons.tsx
-├─ lib/
-│ ├─ date.ts
-│ ├─ storage.ts
-│ └─ taperPlan.ts
-└─ reference/
-└─ omez_taper_calendar_app.jsx
-└─ Screenshot_1.png
-
-For Phase 1, it is acceptable to keep most logic in App.tsx if that is faster.
-Do not over-architect before the prototype works.
+Keep the structure simple until Phase 2 creates a real need to split modules.
 
 ## Implementation Rules
 
@@ -427,32 +403,16 @@ fix TypeScript/build errors;
 inspect the browser console if possible;
 manually test localStorage persistence.
 
-## First Task for Agent
+## Current Task Direction
 
-Recreate the current prototype as a working Vite + React + TypeScript + Tailwind app.
+Phase 1 is finished and committed by the user.
 
-Use the reference prototype from:
+Next work should be small and reviewable:
 
-src/reference/omez_taper_calendar_app.jsx
+- polish the fixed prototype without changing the plan logic;
+- keep `omez-taper-calendar-v1` storage intact;
+- only start universal Phase 2 when explicitly requested.
 
-Steps:
-
-Scaffold a minimal Vite React TypeScript app.
-Add Tailwind.
-Recreate the prototype UI and behavior.
-Replace hardcoded JSX prototype with typed components only where useful.
-Preserve the current plan logic exactly.
-Preserve localStorage persistence.
-Use the Phase 1 storage key `omez-taper-calendar-v1`.
-Run the app locally.
-Build the app.
-Report:
-what files were created;
-how to run;
-how persistence was tested;
-any known limitations.
-
-Do not generalize the product yet.
 Do not add backend.
 Do not add auth.
 Do not add notifications.

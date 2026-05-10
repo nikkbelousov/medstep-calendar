@@ -239,11 +239,20 @@ export default function App() {
               </p>
             </div>
 
-            <div className="grid min-w-full grid-cols-3 gap-2 md:min-w-[360px]">
+            <div className="grid min-w-full grid-cols-2 gap-2 sm:grid-cols-4 md:min-w-[460px]">
               <Stat label="Дней плана" value={stats.total} />
               <Stat label="Приём" value={stats.take} />
               <Stat label="Пропуск" value={stats.skip} />
+              <Stat label="Отмечено" value={stats.done} />
             </div>
+          </div>
+
+          <div className="mt-5 flex gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            <Shield className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
+            <p>
+              Это личный трекер согласованного плана. Он не даёт медицинских советов,
+              диагнозов или рекомендаций по лечению.
+            </p>
           </div>
         </header>
 
