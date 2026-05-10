@@ -10,7 +10,8 @@ import {
 import type { ISODate } from "./date";
 import { DEFAULT_LOCALE, isLocale } from "./i18n";
 
-export const STORAGE_KEY_V2 = "taper-calendar-v2";
+export const STORAGE_KEY_V2 = "medstep-calendar-v1";
+export const STORAGE_KEY_PREVIOUS_UNIVERSAL = "taper-calendar-v2";
 export const STORAGE_KEY_V1 = "omez-taper-calendar-v1";
 
 type LegacyRecord = {
@@ -38,6 +39,12 @@ export function loadState(): AppState {
     const savedV2 = window.localStorage.getItem(STORAGE_KEY_V2);
     if (savedV2) {
       const parsed = safeParse(savedV2);
+      if (isStoredStateCandidate(parsed)) return normalizeAppState(parsed);
+    }
+
+    const savedPreviousUniversal = window.localStorage.getItem(STORAGE_KEY_PREVIOUS_UNIVERSAL);
+    if (savedPreviousUniversal) {
+      const parsed = safeParse(savedPreviousUniversal);
       if (isStoredStateCandidate(parsed)) return normalizeAppState(parsed);
     }
 

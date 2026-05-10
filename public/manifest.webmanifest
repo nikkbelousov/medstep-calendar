@@ -1,9 +1,9 @@
 {
-  "name": "Taper Calendar",
-  "short_name": "Taper",
-  "description": "A local-first calendar for tracking a user-defined medication taper plan.",
-  "start_url": "/",
-  "scope": "/",
+  "name": "MedStep Calendar",
+  "short_name": "MedStep",
+  "description": "A local-first calendar for tracking a user-defined medication step-down plan.",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f8fafc",
@@ -11,7 +11,7 @@
   "categories": ["health", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/icons/app-icon.svg",
+      "src": "icons/app-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

@@ -1,8 +1,31 @@
-node_modules
-dist
-.playwright-cli
-.codex-*.log
-.env
-.env.local
-*.local
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.vite/
 *.tsbuildinfo
+
+# Local environment
+.env
+.env.*
+!.env.example
+*.local
+
+# Codex/local agent files
+AGENTS.md
+.codex-*.log
+.playwright-cli/
+
+# Test and coverage artifacts
+coverage/
+test-results/
+playwright-report/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

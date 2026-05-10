@@ -5,6 +5,7 @@ import {
   loadState,
   migrateLegacyRecords,
   saveState,
+  STORAGE_KEY_PREVIOUS_UNIVERSAL,
   STORAGE_KEY_V1,
   STORAGE_KEY_V2,
 } from "./storage";
@@ -77,6 +78,25 @@ describe("storage", () => {
     window.localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(legacyV2State));
 
     expect(loadState().config.locale).toBe("ru");
+  });
+
+  it("migrates from the previous taper calendar v2 key", () => {
+    const state: AppState = {
+      config: {
+        ...createDefaultConfig(),
+        medicationName: "Legacy",
+      },
+      records: {
+        "2026-05-10": {
+          done: true,
+        },
+      },
+    };
+
+    window.localStorage.setItem(STORAGE_KEY_PREVIOUS_UNIVERSAL, JSON.stringify(state));
+
+    expect(loadState()).toEqual(state);
+    expect(window.localStorage.getItem(STORAGE_KEY_PREVIOUS_UNIVERSAL)).not.toBeNull();
   });
 
   it("normalizes malformed config fields", () => {

@@ -1,5 +1,8 @@
-const CACHE_NAME = "taper-calendar-shell-v1";
-const APP_SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icons/app-icon.svg"];
+const CACHE_NAME = "medstep-calendar-shell-v1";
+const APP_ROOT = new URL("./", self.registration.scope).toString();
+const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/app-icon.svg"].map((url) =>
+  new URL(url, self.registration.scope).toString(),
+);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -28,10 +31,10 @@ self.addEventListener("fetch", (event) => {
       fetch(request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
+          caches.open(CACHE_NAME).then((cache) => cache.put(APP_ROOT, copy));
           return response;
         })
-        .catch(() => caches.match("/") || caches.match("/index.html")),
+        .catch(() => caches.match(APP_ROOT).then((cached) => cached ?? caches.match(new URL("./index.html", self.registration.scope).toString()))),
     );
     return;
   }

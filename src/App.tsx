@@ -129,7 +129,7 @@ export default function App() {
                 </span>
               </div>
               <h1 className="text-2xl font-semibold tracking-normal md:text-3xl">
-                Taper Calendar
+                MedStep Calendar
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
                 {config.medicationName} {config.doseLabel}
