@@ -183,17 +183,21 @@ Icons:
 Persistence:
 
 - Use `localStorage`.
-- Use a single versioned storage key at first.
-- For Phase 1, use the current prototype key: `omez-taper-calendar-v1`.
-- Reserve `taper-calendar-v1` for the future universal Phase 2 model if migration is needed.
+- Current universal app storage key: `taper-calendar-v2`.
+- Legacy prototype key `omez-taper-calendar-v1` is read-only and used only for migration.
 
 ---
 
 ## Current Project Structure
 
-The working Phase 1 app intentionally keeps most logic in `src/App.tsx`.
+The Phase 2 app uses a small split:
 
-Keep the structure simple until Phase 2 creates a real need to split modules.
+- `src/App.tsx` for state and layout.
+- `src/lib/date.ts` for date helpers.
+- `src/lib/plan.ts` for config, presets, phase logic, and plan calculation.
+- `src/lib/storage.ts` for v2 persistence and legacy migration.
+
+Keep this structure simple; do not add extra abstractions unless a concrete feature needs them.
 
 ## Implementation Rules
 
@@ -321,25 +325,25 @@ exporting data for discussion with a clinician.
 Required disclaimer in README and eventually in the app:
 This app is a personal tracking tool. It does not provide medical advice, diagnosis, or treatment recommendations. Medication changes should be discussed with a qualified healthcare professional.
 
-## Phase 2 MVP Direction
+## Phase 2 Status
 
-Do not start Phase 2 until Phase 1 is working.
+Phase 2 is implemented as one configurable local-first taper calendar.
 
-After Phase 1, make the app universal.
-
-MVP features:
+Implemented MVP features:
 
 configurable medication name;
+popular medication name presets plus custom name;
 configurable dose label;
+configurable default time;
 configurable start date;
-configurable schedule pattern;
-support medication labels;
-symptom labels;
+configurable support/rescue medication labels;
+configurable symptom labels;
+schedule presets;
+simple custom pattern sequence;
 localStorage persistence;
-export/import JSON;
-print-friendly view;
-basic README;
-GitHub Pages deployment.
+migration from `omez-taper-calendar-v1` to `taper-calendar-v2`.
+
+Do not add multiple plans, export/import JSON, print view, GitHub Pages deployment, PWA, notifications, or charts unless explicitly requested.
 
 Suggested universal model:
 interface MedicationConfig {
@@ -405,13 +409,14 @@ manually test localStorage persistence.
 
 ## Current Task Direction
 
-Phase 1 is finished and committed by the user.
+Phase 2 is the current baseline.
 
 Next work should be small and reviewable:
 
-- polish the fixed prototype without changing the plan logic;
-- keep `omez-taper-calendar-v1` storage intact;
-- only start universal Phase 2 when explicitly requested.
+- preserve `taper-calendar-v2` compatibility;
+- keep `omez-taper-calendar-v1` read-only for migration;
+- do not generate medical recommendations;
+- avoid adding dependencies unless there is a clear need.
 
 Do not add backend.
 Do not add auth.
