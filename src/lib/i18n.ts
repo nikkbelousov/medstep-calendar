@@ -296,6 +296,36 @@ export const translations = {
     en: "Reset plan settings",
     hy: "Զրոյացնել պլանի կարգավորումները",
   },
+  backupTitle: {
+    ru: "Перенос и резервная копия",
+    en: "Transfer and backup",
+    hy: "Փոխանցում և պահուստավորում",
+  },
+  backupDescription: {
+    ru: "Экспорт создаёт JSON-файл с настройками и отметками. Импорт заменит текущие данные в этом браузере.",
+    en: "Export creates a JSON file with settings and records. Import replaces the current data in this browser.",
+    hy: "Արտահանումը ստեղծում է JSON ֆայլ՝ կարգավորումներով և նշումներով։ Ներմուծումը փոխարինում է այս դիտարկիչի ընթացիկ տվյալները։",
+  },
+  exportData: {
+    ru: "Экспорт",
+    en: "Export",
+    hy: "Արտահանել",
+  },
+  importData: {
+    ru: "Импорт",
+    en: "Import",
+    hy: "Ներմուծել",
+  },
+  importConfirm: {
+    ru: "Импорт заменит текущие настройки и отметки в этом браузере. Продолжить?",
+    en: "Import will replace the current settings and records in this browser. Continue?",
+    hy: "Ներմուծումը կփոխարինի այս դիտարկիչի ընթացիկ կարգավորումները և նշումները։ Շարունակե՞լ։",
+  },
+  importError: {
+    ru: "Не удалось импортировать файл. Проверь, что это JSON-экспорт MedStep Calendar.",
+    en: "Could not import the file. Check that it is a MedStep Calendar JSON export.",
+    hy: "Չհաջողվեց ներմուծել ֆայլը։ Ստուգիր, որ սա MedStep Calendar-ի JSON արտահանում է։",
+  },
   customSequenceTitle: {
     ru: "Своя последовательность",
     en: "Custom sequence",

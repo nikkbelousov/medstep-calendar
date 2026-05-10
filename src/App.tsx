@@ -1,6 +1,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
@@ -32,7 +33,7 @@ import {
   type DayRecord,
   type PhasePresetId,
 } from "./lib/plan";
-import { createDefaultState, loadState, saveState } from "./lib/storage";
+import { createDefaultState, loadState, parseBackup, saveState, serializeBackup } from "./lib/storage";
 
 type RecordPatch = Partial<DayRecord>;
 type IconProps = SVGProps<SVGSVGElement>;
@@ -106,6 +107,26 @@ export default function App() {
 
   function resetAllData(): void {
     const nextState = createDefaultState();
+    setState(nextState);
+    setViewDate(fromISO(nextState.config.startDate));
+    setSelectedISO(nextState.config.startDate);
+    setIsSettingsOpen(false);
+  }
+
+  function exportBackup(): void {
+    const content = serializeBackup(state);
+    const blob = new Blob([content], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `medstep-calendar-backup-${toISO(new Date())}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importBackup(nextState: AppState): void {
     setState(nextState);
     setViewDate(fromISO(nextState.config.startDate));
     setSelectedISO(nextState.config.startDate);
@@ -281,6 +302,8 @@ export default function App() {
         {isSettingsOpen ? (
           <SettingsModal
             config={config}
+            onExport={exportBackup}
+            onImport={importBackup}
             onClose={() => setIsSettingsOpen(false)}
             onResetAll={resetAllData}
             onSave={saveConfig}
@@ -401,11 +424,15 @@ function DayDetails({
 function SettingsModal({
   config,
   onClose,
+  onExport,
+  onImport,
   onResetAll,
   onSave,
 }: {
   config: AppConfig;
   onClose: () => void;
+  onExport: () => void;
+  onImport: (state: AppState) => void;
   onResetAll: () => void;
   onSave: (config: AppConfig) => void;
 }) {
@@ -413,6 +440,8 @@ function SettingsModal({
   const [selectedPreset, setSelectedPreset] = useState<PhasePresetId>("omez");
   const [customSequence, setCustomSequence] = useState<CustomSequenceStep[]>(["take", "skip"]);
   const [isConfirmingFullReset, setIsConfirmingFullReset] = useState(false);
+  const [importError, setImportError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const locale = draft.locale;
 
   useEffect(() => {
@@ -480,6 +509,32 @@ function SettingsModal({
     setCustomSequence(["take", "skip"]);
     setDraft(nextConfig);
     onSave(nextConfig);
+  }
+
+  function handleImportClick(): void {
+    setImportError("");
+    fileInputRef.current?.click();
+  }
+
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>): Promise<void> {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const nextState = parseBackup(text);
+      if (!nextState) {
+        setImportError(t(locale, "importError"));
+        return;
+      }
+
+      if (window.confirm(t(locale, "importConfirm"))) {
+        onImport(nextState);
+      }
+    } catch {
+      setImportError(t(locale, "importError"));
+    }
   }
 
   return (
@@ -634,6 +689,45 @@ function SettingsModal({
               onChange={updateCustomSequence}
             />
           ) : null}
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h4 className="text-sm font-semibold text-slate-900">{t(locale, "backupTitle")}</h4>
+                <p className="mt-1 text-sm text-slate-600">
+                  {t(locale, "backupDescription")}
+                </p>
+                {importError ? (
+                  <p className="mt-2 text-sm font-medium text-red-700">{importError}</p>
+                ) : null}
+              </div>
+              <div className="grid shrink-0 grid-cols-2 gap-2 sm:flex">
+                <button
+                  type="button"
+                  onClick={onExport}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  <Download className="h-4 w-4" />
+                  {t(locale, "exportData")}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleImportClick}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  <Upload className="h-4 w-4" />
+                  {t(locale, "importData")}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={handleImportFile}
+                  className="hidden"
+                />
+              </div>
+            </div>
+          </div>
 
           <div className="rounded-2xl border border-red-100 bg-red-50 p-3 sm:p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1027,6 +1121,26 @@ function Plus(props: IconProps) {
   return (
     <IconBase {...props}>
       <path d="M12 5v14M5 12h14" />
+    </IconBase>
+  );
+}
+
+function Download(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="M7 10l5 5 5-5" />
+      <path d="M12 15V3" />
+    </IconBase>
+  );
+}
+
+function Upload(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="M17 8l-5-5-5 5" />
+      <path d="M12 3v12" />
     </IconBase>
   );
 }

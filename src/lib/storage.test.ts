@@ -1,10 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDefaultConfig, type AppState } from "./plan";
 import {
+  BACKUP_APP_NAME,
+  BACKUP_FORMAT_VERSION,
+  createBackupPayload,
   createDefaultState,
   loadState,
   migrateLegacyRecords,
+  parseBackup,
   saveState,
+  serializeBackup,
   STORAGE_KEY_PREVIOUS_UNIVERSAL,
   STORAGE_KEY_V1,
   STORAGE_KEY_V2,
@@ -64,6 +69,65 @@ describe("storage", () => {
 
     expect(window.localStorage.getItem(STORAGE_KEY_V2)).toBe(JSON.stringify(state));
     expect(loadState()).toEqual(state);
+  });
+
+  it("serializes a portable backup payload", () => {
+    const state: AppState = {
+      config: createDefaultConfig(),
+      records: {
+        "2026-05-10": {
+          done: true,
+          note: "phone",
+        },
+      },
+    };
+
+    const payload = createBackupPayload(state, new Date("2026-05-11T10:00:00.000Z"));
+
+    expect(payload).toEqual({
+      app: BACKUP_APP_NAME,
+      version: BACKUP_FORMAT_VERSION,
+      exportedAt: "2026-05-11T10:00:00.000Z",
+      storageKey: STORAGE_KEY_V2,
+      state,
+    });
+    expect(JSON.parse(serializeBackup(state, new Date("2026-05-11T10:00:00.000Z")))).toEqual(payload);
+  });
+
+  it("parses portable backup payloads", () => {
+    const state: AppState = {
+      config: {
+        ...createDefaultConfig(),
+        medicationName: "Imported",
+      },
+      records: {
+        "2026-05-11": {
+          done: true,
+          supportMedication: true,
+        },
+      },
+    };
+
+    expect(parseBackup(JSON.stringify(createBackupPayload(state)))).toEqual(state);
+  });
+
+  it("parses raw app state backups", () => {
+    const state: AppState = {
+      config: createDefaultConfig(),
+      records: {
+        "2026-05-11": {
+          note: "raw",
+        },
+      },
+    };
+
+    expect(parseBackup(JSON.stringify(state))).toEqual(state);
+  });
+
+  it("rejects malformed backup content", () => {
+    expect(parseBackup("{bad-json")).toBeUndefined();
+    expect(parseBackup(JSON.stringify({ records: {} }))).toBeUndefined();
+    expect(parseBackup(JSON.stringify({ config: {} }))).toBeUndefined();
   });
 
   it("normalizes old v2 state without locale", () => {

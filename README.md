@@ -16,6 +16,7 @@ It helps users see planned intake days, planned skip days, support/rescue marker
 - Daily records: completed, support, rescue, symptoms, note.
 - UI languages: English, Russian, Armenian.
 - Local browser storage with `localStorage`.
+- JSON export/import for moving data between browsers or devices.
 - Automatic migration from earlier local storage keys.
 - Basic PWA support: manifest, app icon, service worker, standalone mode.
 
@@ -23,7 +24,7 @@ It helps users see planned intake days, planned skip days, support/rescue marker
 
 MedStep Calendar has no backend, login, database, analytics, or cloud sync. Data is stored locally in the user's browser.
 
-Clearing browser data can remove app records. JSON export/import is not implemented yet.
+Clearing browser data can remove app records. Use JSON export/import in plan settings to move data between devices or keep a backup.
 
 ## Tech Stack
 
@@ -109,7 +110,6 @@ https://<github-user>.github.io/medstep-calendar/
 
 ## Roadmap
 
-- JSON export/import.
 - Print-friendly monthly view.
 - Better production PWA installability checks.
 
@@ -133,6 +133,7 @@ MedStep Calendar — локальное веб-приложение для от�
 - Отметки по дням: выполнено, поддержка, резерв, симптомы, заметка.
 - Языки интерфейса: английский, русский, армянский.
 - Локальное хранение через `localStorage`.
+- Export/import JSON для переноса данных между браузерами или устройствами.
 - Автоматическая миграция из старых локальных ключей хранения.
 - Базовая PWA-поддержка: manifest, app icon, service worker, standalone mode.
 
@@ -140,7 +141,7 @@ MedStep Calendar — локальное веб-приложение для от�
 
 В приложении нет backend, логина, базы данных, аналитики или облачной синхронизации. Данные хранятся локально в браузере пользователя.
 
-При очистке данных браузера записи приложения могут быть удалены. Export/import JSON пока не реализован.
+При очистке данных браузера записи приложения могут быть удалены. Используй export/import JSON в настройках плана для переноса данных между устройствами или резервной копии.
 
 ### Запуск
 

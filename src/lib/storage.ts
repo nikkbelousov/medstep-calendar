@@ -13,6 +13,16 @@ import { DEFAULT_LOCALE, isLocale } from "./i18n";
 export const STORAGE_KEY_V2 = "medstep-calendar-v1";
 export const STORAGE_KEY_PREVIOUS_UNIVERSAL = "taper-calendar-v2";
 export const STORAGE_KEY_V1 = "omez-taper-calendar-v1";
+export const BACKUP_APP_NAME = "MedStep Calendar";
+export const BACKUP_FORMAT_VERSION = 1;
+
+export interface BackupPayload {
+  app: typeof BACKUP_APP_NAME;
+  version: typeof BACKUP_FORMAT_VERSION;
+  exportedAt: string;
+  storageKey: typeof STORAGE_KEY_V2;
+  state: AppState;
+}
 
 type LegacyRecord = {
   done?: boolean;
@@ -82,6 +92,31 @@ export function saveState(state: AppState): void {
   } catch {
     // localStorage can be unavailable in private or restricted browser contexts.
   }
+}
+
+export function createBackupPayload(state: AppState, exportedAt = new Date()): BackupPayload {
+  return {
+    app: BACKUP_APP_NAME,
+    version: BACKUP_FORMAT_VERSION,
+    exportedAt: exportedAt.toISOString(),
+    storageKey: STORAGE_KEY_V2,
+    state: normalizeAppState(state),
+  };
+}
+
+export function serializeBackup(state: AppState, exportedAt = new Date()): string {
+  return JSON.stringify(createBackupPayload(state, exportedAt), null, 2);
+}
+
+export function parseBackup(value: string): AppState | undefined {
+  const parsed = safeParse(value);
+  if (isBackupStateCandidate(parsed)) return normalizeAppState(parsed);
+
+  if (isPlainObject(parsed) && isBackupStateCandidate(parsed.state)) {
+    return normalizeAppState(parsed.state);
+  }
+
+  return undefined;
 }
 
 export function migrateLegacyRecords(records: LegacyRecords): Records {
@@ -229,6 +264,10 @@ function normalizeDayRecord(value: unknown): DayRecord {
 
 function isStoredStateCandidate(value: unknown): boolean {
   return isPlainObject(value) && isPlainObject(value.config);
+}
+
+function isBackupStateCandidate(value: unknown): boolean {
+  return isPlainObject(value) && isPlainObject(value.config) && isPlainObject(value.records);
 }
 
 function isRecordMap(value: unknown): value is Record<string, unknown> {
